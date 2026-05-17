@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ランぬクエスト VSジークフリートさんＨＬ</title>
+    <meta property="og:title" content="ランぬクエスト VSジークフリートさんHL">
+    <meta property="og:description" content="手加減なしで行くぞ、ランスロット！">
+    <meta property="og:image" content="https://lanchangame.github.io/lannuquestvsghl/image.png">
+    <meta property="og:url" content="https://lanchangame.github.io/lannuquestvsghl/">
+    <meta name="twitter:card" content="summary_large_image">
+    <style>
+        body { margin:0; background:#0d0d0d; display:flex; flex-direction:column; align-items:center; min-height:100vh; overflow-y:auto; overflow-x:hidden; font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif; padding:20px 0 50px; touch-action:manipulation; }
+        #game-viewport { position:relative; width:320px; height:400px; border:4px solid #4a0000; border-radius:12px; overflow:hidden; background:#1a0a0a; box-shadow:0 0 30px rgba(255,0,0,0.4); opacity:0; transition:opacity 0.5s; touch-action:none; }
+        #start-screen { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; text-align:center; padding:20px; box-sizing:border-box; }
+        .title-img { max-width:280px; height:auto; margin-bottom:15px; background:transparent; padding:0; border-radius:0; filter:none; }
+        .start-message { font-size:11px; line-height:1.5; margin-bottom:20px; }
+        .note { color:#888; font-size:9px; }
+        .btn-start { background:#4a0000; color:#fff; border:2px solid #ff3300; padding:12px 35px; border-radius:25px; font-weight:700; font-size:16px; cursor:pointer; box-shadow:0 4px 0 #200000; text-shadow:0 0 5px #ff3300; touch-action:manipulation; }
+        #game-bg { position:absolute; top:0; left:0; width:100%; height:100%; background:url('haikei.png') center/cover; opacity:0.4; z-index:0; pointer-events:none; }
+        #game-world { position:absolute; width:100%; height:4200px; top:-3800px; background: linear-gradient(rgba(255,51,0,0.2) 3px, transparent 3px) repeat-y 0 0 / 100% 50px; z-index:1; }
+        #player { position:absolute; width:50px; height:50px; background-size:contain; background-repeat:no-repeat; background-position:center; z-index:10; }
+        .sword { position:absolute; font-size:28px; width:28px; height:28px; display:flex; justify-content:center; align-items:center; z-index:5; filter:drop-shadow(0 0 5px #fff); animation:spinSword .25s infinite linear; }
+        @keyframes spinSword { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+        #goal { position:absolute; top:50px; left:125px; width:70px; height:70px; z-index:10; filter:drop-shadow(0 0 15px #ff0000); animation:roar 1s infinite alternate; background:url('goal.png') center/contain no-repeat; }
+        @keyframes roar { from { transform:scale(1); opacity:.8; } to { transform:scale(1.1); opacity:1; } }
+        #ui-panel { position:absolute; top:5px; left:5px; color:#ff3300; background:rgba(0,0,0,0.8); padding:5px 10px; border-radius:12px; font-size:10px; font-weight:700; z-index:100; border:1px solid #4a0000; pointer-events:none; line-height:1.4; }
+        #timer { transition: color 0.3s, font-size 0.3s; display: inline-block; }
+        .timer-hurry { color: #ff3300 !important; animation: pulse 0.5s infinite alternate; font-weight: 900; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } }
+        
+        .dodge-effect { position:absolute; pointer-events:none; border-radius:50%; background:radial-gradient(circle, #fff, #ffd700, transparent); z-index:11; animation: particle .6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+        @keyframes particle { to { transform: translate(var(--tx), var(--ty)) scale(0); opacity:0; } }
+
+        .pop-text { position:absolute; font-weight:900; font-size:22px; z-index:100; pointer-events:none; animation: popUp 0.8s ease-out forwards; text-shadow: 2px 2px 0 #000; }
+        @keyframes popUp {
+            0% { transform: scale(0.5); opacity:0; }
+            20% { transform: scale(1.2); opacity:1; }
+            100% { transform: translateY(-60px) scale(1); opacity:0; }
+        }
+
+        #custom-dialog { display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:260px; background:rgba(20,0,0,0.98); border:3px solid #ff3300; border-radius:15px; color:#fff; padding:20px; text-align:center; z-index:1000; box-shadow:0 0 50px #000; }
+        #custom-dialog h2 { font-size:18px; color:#ff3300; margin:0 0 10px; }
+        #custom-dialog input { width:80%; padding:10px; margin:10px 0; border-radius:5px; border:2px solid #ff3300; background:#000; color:#fff; font-size:16px; text-align:center; }
+        .dialog-btn-container { display:flex; flex-direction:column; gap:10px; margin-top:15px; }
+        #custom-dialog button { width:100%; padding:12px; border-radius:25px; border:none; cursor:pointer; font-weight:700; font-size:13px; }
+        .btn-save, .btn-continue, .btn-retry, .btn-share { background:#4a0000; color:#fff; border:2px solid #ff3300 !important; }
+        #ranking-display { position:absolute; bottom:5px; left:5px; background:rgba(0,0,0,0.8); color:#ffd700; padding:6px; border-radius:8px; font-size:9px; z-index:100; pointer-events:none; width:130px; border:1px solid #4a0000; }
+
+        #controls { display:grid; grid-template-columns:repeat(3,65px); gap:12px; margin-top:20px; user-select:none; justify-content:center; }
+        .btn { width:65px; height:65px; background:rgba(139,0,0,0.4); border:2px solid #ff3300; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:24px; color:#ff3300; cursor:pointer; -webkit-tap-highlight-color:transparent; box-shadow: 0 0 10px rgba(255,51,0,0.3); position: relative; }
+        .btn:active { background:rgba(255,0,0,0.6); transform: scale(0.9); }
+        
+        .up    { grid-column: 2; grid-row: 1; }
+        .left  { grid-column: 1; grid-row: 2; }
+        .right { grid-column: 3; grid-row: 2; }
+        .dodge { grid-column: 2; grid-row: 2; background:#4a0000; color:#ffd700; border:2px solid #ffd700; font-size:12px; font-weight:bold; flex-direction:column; text-shadow: 0 0 5px #ffd700; }
+
+        #credits { margin-top:40px; color:#888; font-size:11px; text-align:center; line-height:1.6; }
+        .credit-item { margin:0 10px; display:inline-block; }
+    </style>
+</head>
+<body>
+    <div id="game-viewport">
+        <div id="start-screen">
+            <img src="title.png" alt="タイトル" class="title-img">
+            <div class="start-message">
+                十字キーでランぬを操作して<br>ジークフリートさんがくりだす剣を回避し<br>いまこそ並び立つぞ！<br>DODGEボタンで5回まで回避可能！<br><br>
+                <span class="note">スコアや名前はブラウザ内でのみ保存されます。</span><br>
+                <span class="note">音が出ますのでご注意ください。</span><br>
+                <span class="note">非公式同人ゲームです。</span>
+            </div>
+            <button class="btn-start" onclick="startGame()">START</button>
+        </div>
+        <div id="game-bg"></div>
+        <div id="ui-panel">師匠まで: <span id="dist">--</span>m<br>残り時間: <span id="timer">60.0</span>s<br>LIFE: <span id="life-icons">❤️❤️❤️❤️❤️</span><br>DODGE: <span id="dodge-count">5</span></div>
+        <div id="game-world"><div id="player"></div><div id="goal"></div></div>
+        <div id="custom-dialog">
+            <h2 id="dialog-title">RESULT</h2><div id="dialog-text" style="font-size:13px;line-height:1.5;margin-bottom:10px;"></div>
+            <div id="input-area"><input type="text" id="player-name" maxlength="8" placeholder="団長の名前を教えてくれ"></div>
+            <div class="dialog-btn-container">
+                <button id="btn-action-continue" class="btn-continue" style="display:none;">ここからコンティニュー</button>
+                <button id="btn-action-save" class="btn-save">スコアを保存して次へ</button>
+                <button id="btn-action-share" class="btn-share">スコアを𝕏に投稿してくれ</button>
+                <button id="btn-action-retry" class="btn-retry">最初から挑戦</button>
+            </div>
+        </div>
+        <div id="ranking-display"><strong>ハイスコア</strong><br><span id="rank-list">記録なし</span></div>
+    </div>
+    <div id="controls">
+        <div class="btn up" id="btn-up">▲</div>
+        <div class="btn left" id="btn-left">◀</div>
+        <div class="btn dodge" id="btn-dodge">DODGE<br><span id="btn-dodge-val">5</span></div>
+        <div class="btn right" id="btn-right">▶</div>
+    </div>
+    <div id="credits"><span class="credit-item">ゲーム制作：ろかす</span><span class="credit-item">イラスト：水田</span></div>
+
+    <script>
+        const viewport=document.getElementById('game-viewport'), world=document.getElementById('game-world'), playerElement=document.getElementById('player');
+        const timerElement=document.getElementById('timer'), distElement=document.getElementById('dist'), lifeIconsElement=document.getElementById('life-icons');
+        const rankListElement=document.getElementById('rank-list'), dialog=document.getElementById('custom-dialog'), dialogTitle=document.getElementById('dialog-title'), dialogText=document.getElementById('dialog-text');
+        const inputArea=document.getElementById('input-area'), nameInput=document.getElementById('player-name'), btnSave=document.getElementById('btn-action-save'), btnShare=document.getElementById('btn-action-share'), btnRetry=document.getElementById('btn-action-retry'), btnContinue=document.getElementById('btn-action-continue'), startScreen=document.getElementById('start-screen');
+        const charaImg=new Image(); charaImg.src='chara.png'; charaImg.onload=()=>{playerElement.style.backgroundImage=`url('${charaImg.src}')`; viewport.style.opacity='1';}; charaImg.onerror=()=>{playerElement.style.backgroundColor='#ff3300'; viewport.style.opacity='1';};
+        
+        let player={x:135, y:4100}, enemies=[], gameActive=false, gameStartedOnce=false, startTime, finalScore, shareText="", life=5, invincibilityFrames=0, damagePenalty=0;
+        let lastTickSecond = 60, dodgeRemaining = 5, dodgeActive = false, dodgeBonus = 0, hasContinued = false, boostTimer = 0, dodgeTimer = null, lastDodgePressTime = 0, dodgeWasSuccessful = false, gameOverTime = 0;
+        const viewHeight=400, RANKING_KEY='lannu_ranking_final', TIME_LIMIT = 60000;
+
+        let lastFrameTime = 0;
+        let accumulator = 0;
+        let enemySpawnTimer = 0;
+        const fpsInterval = 1000 / 60;
+
+        const keysPressed = {};
+        let audioCtx = null;
+        function playSE(type) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination); const now = audioCtx.currentTime;
+            if (type === 'start') { osc.frequency.setValueAtTime(523.25, now); osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.1); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.1); osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'tick') { osc.frequency.setValueAtTime(1200, now); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.05); osc.start(now); osc.stop(now + 0.05);
+            } else if (type === 'move') { osc.frequency.setValueAtTime(880, now); osc.frequency.exponentialRampToValueAtTime(440, now + 0.05); gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0, now + 0.05); osc.start(now); osc.stop(now + 0.05);
+            } else if (type === 'success') { osc.frequency.setValueAtTime(660, now); osc.frequency.exponentialRampToValueAtTime(1320, now + 0.1); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.2); osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'failed') { osc.type='sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3); osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'dodge') { osc.type='sawtooth'; osc.frequency.setValueAtTime(600, now); osc.frequency.linearRampToValueAtTime(1600, now + 0.1); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.2); osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'damage') { osc.type='square'; osc.frequency.setValueAtTime(200, now); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.2); osc.start(now); osc.stop(now + 0.2); }
+        }
+
+        function showPopText(txt, x, y, col) {
+            const el = document.createElement('div'); el.className = 'pop-text';
+            el.innerText = txt; el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.color = col;
+            world.appendChild(el); setTimeout(() => el.remove(), 800);
+        }
+
+        function startGame(){ 
+            if(gameStartedOnce) return;
+            gameStartedOnce = true;
+            playSE('start'); startScreen.style.display='none'; gameActive=true; startTime=Date.now(); 
+            lastFrameTime = Date.now();
+            accumulator = 0;
+            enemySpawnTimer = 0;
+            requestAnimationFrame(loop); 
+        }
+
+        function updateView(){
+            playerElement.style.left=player.x+'px'; playerElement.style.top=player.y+'px';
+            world.style.top = -Math.max(0, Math.min(3800, player.y-viewHeight/2)) + 'px';
+            distElement.innerText=Math.max(0, Math.floor(player.y-100));
+            let i=""; for(let j=0; j<5; j++) i+=j<life?"❤️":"🖤"; lifeIconsElement.innerText=i;
+            playerElement.style.opacity=invincibilityFrames>0?((invincibilityFrames%10<5)?"0.3":"1"):"1";
+            document.getElementById('dodge-count').innerText = dodgeRemaining;
+            document.getElementById('btn-dodge-val').innerText = dodgeRemaining;
+            playerElement.style.filter = dodgeActive ? "brightness(2.5) drop-shadow(0 0 15px #ffd700)" : (boostTimer > 0 ? "brightness(1.5) drop-shadow(0 0 8px #ff3300)" : "none");
+        }
+
+        function movePlayer(d){
+            if(!gameActive)return; 
+            const speed = (boostTimer > 0) ? 42 : 28;
+            if(d==='up')player.y-=speed; if(d==='left')player.x-=speed; if(d==='right')player.x+=speed;
+            player.x=Math.max(0,Math.min(270,player.x)); player.y=Math.max(0,Math.min(4100,player.y));
+            playSE('move'); updateView(); if(player.y<120&&player.x>100&&player.x<170){gameActive=false; showResult(true);}
+        }
+        
+        function spawnParticles(x, y) {
+            for(let i=0; i<18; i++) {
+                const p = document.createElement('div'); p.className = 'dodge-effect';
+                p.style.width = p.style.height = (Math.random()*12+6) + 'px';
+                p.style.left = (x+25)+'px'; p.style.top = (y+25)+'px';
+                p.style.setProperty('--tx', (Math.random()-0.5)*250 + 'px'); p.style.setProperty('--ty', (Math.random()-0.5)*250 + 'px');
+                world.appendChild(p); setTimeout(() => p.remove(), 600);
+            }
+        }
+
+        function useDodge() {
+            if(!gameActive || dodgeRemaining <= 0) return;
+            lastDodgePressTime = Date.now();
+            dodgeWasSuccessful = false;
+            dodgeRemaining--; dodgeActive = true;
+            if(dodgeTimer) clearTimeout(dodgeTimer);
+            dodgeTimer = setTimeout(() => { 
+                dodgeActive = false; 
+                if(!dodgeWasSuccessful && gameActive) {
+                    playSE('failed');
+                    showPopText('FAILED...', player.x, player.y, '#ff3300');
+                }
+                updateView(); 
+            }, 400); 
+            updateView();
+        }
+
+       
+        function addControl(id,d){ 
+            let el=document.getElementById(id);
+            if(!el) return;
+            const trigger = (e) => { e.preventDefault(); if(!keysPressed[id]){ if(d==='dodge') useDodge(); else movePlayer(d); keysPressed[id]=true; } };
+            const release = () => { keysPressed[id] = false; };
+            el.addEventListener('touchstart', trigger, {passive:false}); el.addEventListener('mousedown', trigger);
+            el.addEventListener('touchend', release); el.addEventListener('mouseup', release);
+            el.addEventListener('mouseleave', release); el.addEventListener('touchcancel', release);
+        }
+        ['up','left','right','dodge'].forEach(d => addControl('btn-'+d, d));
+
+        window.addEventListener('keydown',e=>{
+            const key = e.key;
+            if(!gameActive) {
+                if(key === 'Control') {
+                    if(!gameStartedOnce) {
+                        startGame();
+                    } else if(dialog.style.display === "block" && btnRetry.style.display !== "none") {
+                        location.reload();
+                    }
+                }
+                return;
+            }
+            if(key.includes('Arrow') && !keysPressed[key]){ 
+                const dir = key.replace('Arrow','').toLowerCase();
+                if(dir !== 'down') movePlayer(dir); 
+                keysPressed[key]=true; 
+            }
+            if((key === 'd' || key === ' ' || key === 'Enter') && !keysPressed[key]) { useDodge(); keysPressed[key]=true; }
+            if(key === 'Control') { keysPressed[key]=true; }
+        });
+        window.addEventListener('keyup',e=>{ keysPressed[e.key]=false; });
+       
+        window.addEventListener('blur', () => { for(let k in keysPressed) keysPressed[k] = false; });
+
+        function createEnemy(){
+            if(!gameActive)return; let eDiv=document.createElement('div'); eDiv.className='sword'; eDiv.innerText='⚔️';
+            let isBottom = Math.random() < 0.5;
+            let startX=Math.random()*290, y=isBottom ? player.y+400+(Math.random()*200) : Math.max(10,player.y-450-(Math.random()*250));
+            let sy=isBottom ? -7.5 : 7.0;
+            eDiv.style.left=startX+'px'; eDiv.style.top=y+'px'; world.appendChild(eDiv);
+            enemies.push({el:eDiv, baseX:startX+14, x:startX+14, y:y+14, speedY:sy, angle:Math.random()*Math.PI*2});
+        }
+
+        function moveEnemies(){
+            const pX = player.x + 25, pY = player.y + 25;
+            let doDodge = false;
+            
+            enemies.forEach((e) => {
+                e.y += e.speedY;
+                e.angle += 0.15;
+                e.x = e.baseX + Math.sin(e.angle) * 20;
+                if(e.el) {
+                    e.el.style.top = (e.y - 14) + 'px';
+                    e.el.style.left = (e.x - 14) + 'px';
+                }
+                
+                const dist = Math.sqrt((e.x - pX) ** 2 + (e.y - pY) ** 2);
+                if(dist < 26) {
+                    if(dodgeActive) {
+                        doDodge = true;
+                    } else if(invincibilityFrames <= 0) {
+                        life--; damagePenalty += 7500; invincibilityFrames = 60; 
+                        if(Date.now() - lastDodgePressTime < 1000) {
+                            dodgeWasSuccessful = true;
+                            playSE('failed'); 
+                            showPopText('FAILED...', player.x, player.y, '#ff3300');
+                        } else {
+                            playSE('damage');
+                        }
+                        updateView(); if(life <= 0) { gameActive = false; showResult(false); }
+                    }
+                }
+            });
+
+            if(doDodge) {
+                dodgeWasSuccessful = true;
+                dodgeBonus += 2000; invincibilityFrames = 50; boostTimer = 45; player.y -= 130; 
+                playSE('success'); spawnParticles(player.x, player.y);
+                showPopText('SUCCESS!', player.x, player.y, '#ffd700');
+                
+                enemies.forEach(item => {
+                    let d = Math.sqrt((item.x - pX) ** 2 + (item.y - pY) ** 2);
+                    if(d < 120 && item.el) {
+                        item.el.style.transition = "transform 0.3s, opacity 0.3s";
+                        item.el.style.transform = "scale(0) rotate(180deg)";
+                        item.el.style.opacity = "0";
+                        item.dead = true;
+                        setTimeout(() => { if(item.el) item.el.remove(); }, 300);
+                    }
+                });
+                updateView();
+            }
+
+            for(let n = enemies.length - 1; n >= 0; n--){
+                let e = enemies[n];
+                if(e.dead) {
+                    enemies.splice(n, 1);
+                } else if(e.y > player.y + 600 || e.y < player.y - 600) {
+                    if(e.el) e.el.remove(); 
+                    enemies.splice(n, 1);
+                }
+            }
+        }
+
+        function loop(){
+            if(!gameActive)return;
+            requestAnimationFrame(loop);
+            
+            let now = Date.now();
+            let dt = now - lastFrameTime;
+            lastFrameTime = now;
+            
+            if (dt > 1000) {
+                startTime += (dt - fpsInterval);
+                dt = fpsInterval;
+            }
+            
+            accumulator += dt;
+            
+            while (accumulator >= fpsInterval) {
+                if(invincibilityFrames>0)invincibilityFrames--;
+                if(boostTimer>0)boostTimer--;
+                
+                enemySpawnTimer += fpsInterval;
+                if (enemySpawnTimer >= 160) {
+                    createEnemy();
+                    enemySpawnTimer -= 160;
+                }
+                
+                moveEnemies(); 
+                accumulator -= fpsInterval;
+            }
+            
+            let elapsed = Date.now() - startTime; let remaining = Math.max(0, (TIME_LIMIT - elapsed) / 1000);
+            timerElement.innerText = remaining.toFixed(1);
+            if (elapsed >= TIME_LIMIT) { gameActive = false; showResult(false, true); return; }
+            updateView();
+        }
+
+        function showResult(w, isTimeUp = false){
+            dialog.style.display="block"; btnContinue.style.display="none";
+            if(!w){ 
+                if (!isTimeUp) gameOverTime = Date.now();
+                dialogTitle.innerText = isTimeUp ? "TIME UP" : "GAME OVER"; 
+                dialogText.innerHTML = isTimeUp ? "遅いぞ！<br>実戦であれば今の一瞬が命取りだ！" : "やっぱりジークフリートさんは最強だ…<br>修行しなおしてくるぞ！"; 
+                inputArea.style.display="none"; btnSave.style.display=btnShare.style.display="none"; 
+                if(!isTimeUp) btnContinue.style.display="block"; return; 
+            }
+            finalScore=hasContinued ? 0 : Math.max(100,50000-Math.floor(((Date.now()-startTime)/1000)*800)-damagePenalty+dodgeBonus);
+            let r = hasContinued ? "【コンティニューしてクリア】\n次は一度も倒れずに並び立ってみせろ！" : (finalScore>=22000?"★★★\n強くなったな、フェードラッヘは安泰だ":finalScore>=10000?"★★☆\nなかなかやるな、ランスロット":"★☆☆\nもっと手合わせをしてやろうか？");
+            dialogTitle.innerText="★CLEAR!★"; dialogText.innerHTML=`フェードラッヘはまかせてください！<br><br>${r.replace(/\n/g,'<br>')}<br><br>タイム: ${((Date.now()-startTime)/1000).toFixed(1)}秒 / スコア: ${finalScore}点`;
+            shareText=`【非公式同人ゲーム ランぬクエストVSジークフリートさんＨＬ】をクリア！ 評価: ${r.replace(/\n/g,'')} スコア: ${finalScore}点 #ランぬクエストジークフリートさん戦ハイレベル https://lanchangame.github.io/lannuquestvsghl/`;
+            inputArea.style.display="block"; btnSave.style.display=btnShare.style.display="block"; btnRetry.style.display="none";
+        }
+
+        btnContinue.onclick = () => { 
+            life = 5; 
+            dodgeRemaining = 5; 
+            hasContinued = true; 
+            startTime += (Date.now() - gameOverTime);
+            dialog.style.display = "none"; 
+            gameActive = true; 
+            accumulator = 0;
+            enemySpawnTimer = 0;
+            lastFrameTime = Date.now(); 
+            requestAnimationFrame(loop); 
+            updateView(); 
+        };
+        btnSave.onclick=()=>{saveScore(nameInput.value||"師に並んだランぬ",finalScore); location.reload();};
+        btnShare.onclick=()=>{window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`,'_blank');};
+        btnRetry.onclick=()=>location.reload();
+        function saveScore(n,s){let r=JSON.parse(localStorage.getItem(RANKING_KEY))||[]; r.push({name:n,score:s}); r.sort((a,b)=>b.score-a.score); r=r.slice(0,5); localStorage.setItem(RANKING_KEY,JSON.stringify(r));}
+        function displayRanking(){let r=JSON.parse(localStorage.getItem(RANKING_KEY))||[]; if(!r.length)return; let h=""; r.forEach((t,i)=>{let n=t.name.length>7?t.name.substring(0,6)+'…':t.name; h+=`${i+1}. ${n} (${t.score})<br>`;}); rankListElement.innerHTML=h;}
+        
+        displayRanking();
+    </script>
+</body>
+</html>
