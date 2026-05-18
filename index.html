@@ -340,7 +340,7 @@
                 if(!isTimeUp) btnContinue.style.display="block"; return; 
             }
             finalScore=hasContinued ? 0 : Math.max(100,50000-Math.floor(((Date.now()-startTime)/1000)*800)-damagePenalty+dodgeBonus);
-            let r = hasContinued ? "【コンティニューしてクリア】\n次は一度も倒れずに並び立ってみせろ！" : (finalScore>=22000?"★★★\n強くなったな、フェードラッヘは安泰だ":finalScore>=10000?"★★☆\nなかなかやるな、ランスロット":"★☆☆\nもっと手合わせをしてやろうか？");
+            let r = hasContinued ? "【コンティニューしてクリア】\n次は一度も倒れずに並び立ってみせろ！" : (finalScore>=40000?"★★★\n強くなったな、フェードラッヘは安泰だ":finalScore>=30000?"★★☆\nなかなかやるな、ランスロット":"★☆☆\nもっと手合わせをしてやろうか？");
             dialogTitle.innerText="★CLEAR!★"; dialogText.innerHTML=`フェードラッヘはまかせてください！<br><br>${r.replace(/\n/g,'<br>')}<br><br>タイム: ${((Date.now()-startTime)/1000).toFixed(1)}秒 / スコア: ${finalScore}点`;
             shareText=`【非公式同人ゲーム ランぬクエストVSジークフリートさんＨＬ】をクリア！ 評価: ${r.replace(/\n/g,'')} スコア: ${finalScore}点 #ランぬクエストジークフリートさん戦ハイレベル https://lanchangame.github.io/lannuquestvsghl/`;
             inputArea.style.display="block"; btnSave.style.display=btnShare.style.display="block"; btnRetry.style.display="none";
